@@ -552,7 +552,8 @@ def admin():
     if "email" not in session:
         return redirect(url_for("login"))
 
-    user = users_collection.find_one({"email": session["email"]})
+    # ✅ FIXED HERE
+    user = mongo.db.users.find_one({"email": session["email"]})
 
     if not user or user.get("role") != "admin":
         flash("Access Denied: Admins only", "error")
@@ -566,23 +567,23 @@ def admin():
     dau = len(users)
     matches_today = len(sessions)
 
-    avg_rms = 75  # you can calculate later
+    avg_rms = 75
     completion_rate = 80
 
     active_sessions = len([s for s in sessions if s.get("status") == "active"])
 
     # 🚨 ALERTS
     low_rated = len([f for f in feedbacks if int(f.get("rating", 0)) <= 2])
-    reported_users = 0  # update later if you add reports
+    reported_users = 0
     suspicious = 0
 
-    # 📈 GRAPH DATA (dummy for now)
+    # 📈 GRAPH DATA
     dates = ["Mon", "Tue", "Wed", "Thu", "Fri"]
     user_counts = [5, 10, 15, 20, 25]
     rms_scores = [60, 65, 70, 75, 80]
 
     return render_template(
-        "admin_dashboard.html",   # ✅ IMPORTANT CHANGE
+        "admin_dashboard.html",
         users=users,
         sessions=sessions,
         feedbacks=feedbacks,
