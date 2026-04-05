@@ -560,13 +560,43 @@ def admin():
 
     users = list(mongo.db.users.find())
     sessions = list(mongo.db.sessions.find())
-    feedback = list(mongo.db.feedback.find())
+    feedbacks = list(mongo.db.feedback.find())
+
+    # 📊 METRICS
+    dau = len(users)
+    matches_today = len(sessions)
+
+    avg_rms = 75  # you can calculate later
+    completion_rate = 80
+
+    active_sessions = len([s for s in sessions if s.get("status") == "active"])
+
+    # 🚨 ALERTS
+    low_rated = len([f for f in feedbacks if int(f.get("rating", 0)) <= 2])
+    reported_users = 0  # update later if you add reports
+    suspicious = 0
+
+    # 📈 GRAPH DATA (dummy for now)
+    dates = ["Mon", "Tue", "Wed", "Thu", "Fri"]
+    user_counts = [5, 10, 15, 20, 25]
+    rms_scores = [60, 65, 70, 75, 80]
 
     return render_template(
-        "admin.html",
+        "admin_dashboard.html",   # ✅ IMPORTANT CHANGE
         users=users,
         sessions=sessions,
-        feedback=feedback
+        feedbacks=feedbacks,
+        dau=dau,
+        matches_today=matches_today,
+        avg_rms=avg_rms,
+        completion_rate=completion_rate,
+        active_sessions=active_sessions,
+        low_rated=low_rated,
+        reported_users=reported_users,
+        suspicious=suspicious,
+        dates=dates,
+        user_counts=user_counts,
+        rms_scores=rms_scores
     )
 
 @app.route("/test-ai")

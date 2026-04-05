@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #f5f7fb;
+    }
+
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    /* METRICS */
+    .metrics {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      flex: 1;
+      min-width: 180px;
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+    }
+
+    .green { background: #28a745; }
+    .yellow { background: #ffc107; color:black;}
+    .red { background: #dc3545; }
+    .blue { background: #007bff; }
+
+    /* LAYOUT */
+    .grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    canvas {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .alerts {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      background: white;
+      border-radius: 10px;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    h3 {
+      margin-top: 30px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>⚙️ Admin Dashboard</h2>
+  <span>System Overview</span>
+</header>
+
+<div class="container">
+
+  <!-- 🔝 METRICS -->
+  <div class="metrics">
+    <div class="card green">
+      <h3>DAU</h3>
+      <p>{{ dau }}</p>
+    </div>
+
+    <div class="card blue">
+      <h3>Matches</h3>
+      <p>{{ matches_today }}</p>
+    </div>
+
+    <div class="card yellow">
+      <h3>Avg RMS</h3>
+      <p>{{ avg_rms }}</p>
+    </div>
+
+    <div class="card green">
+      <h3>Completion</h3>
+      <p>{{ completion_rate }}%</p>
+    </div>
+
+    <div class="card red">
+      <h3>Live Sessions</h3>
+      <p>{{ active_sessions }}</p>
+    </div>
+  </div>
+
+  <!-- 📊 GRAPHS + ALERTS -->
+  <div class="grid">
+
+    <!-- LEFT SIDE -->
+    <div>
+      <canvas id="userChart"></canvas>
+      <br>
+      <canvas id="rmsChart"></canvas>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="alerts">
+      <h3>🚨 Alerts</h3>
+      <p>Low Rated Sessions: {{ low_rated }}</p>
+      <p>Reported Users: {{ reported_users }}</p>
+      <p>Suspicious Activity: {{ suspicious }}</p>
+    </div>
+
+  </div>
+
+  <!-- 👥 USERS -->
+  <h3>Users</h3>
+  <table>
+    <tr>
+      <th>Email</th>
+      <th>Action</th>
+    </tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.email }}</td>
+      <td><a href="#">Ban</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- 📚 SESSIONS -->
+  <h3>Sessions</h3>
+  <table>
+    <tr>
+      <th>Room</th>
+      <th>Status</th>
+      <th>Time</th>
+    </tr>
+    {% for s in sessions %}
+    <tr>
+      <td>{{ s.room_id }}</td>
+      <td>{{ s.status }}</td>
+      <td>{{ s.scheduled_time if s.scheduled_time else "Not Set" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- ⭐ FEEDBACK -->
+  <h3>Feedback</h3>
+  <table>
+    <tr>
+      <th>Rating</th>
+      <th>Comment</th>
+    </tr>
+    {% for f in feedbacks %}
+    <tr>
+      <td>{{ f.rating }} ⭐</td>
+      <td>{{ f.comment }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+</div>
+
+<!-- 📈 CHARTS -->
+<script>
+new Chart(document.getElementById("userChart"), {
+  type: 'line',
+  data: {
+    labels: {{ dates|safe }},
+    datasets: [{
+      label: "User Growth",
+      data: {{ user_counts|safe }},
+      borderColor: "blue",
+      fill: false
+    }]
+  }
+});
+
+new Chart(document.getElementById("rmsChart"), {
+  type: 'line',
+  data: {
+    labels: {{ dates|safe }},
+    datasets: [{
+      label: "RMS Trend",
+      data: {{ rms_scores|safe }},
+      borderColor: "green",
+      fill: false
+    }]
+  }
+});
+</script>
+
+</body>
+</html>
