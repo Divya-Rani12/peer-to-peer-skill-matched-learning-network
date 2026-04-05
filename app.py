@@ -227,7 +227,8 @@ def login():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
 
-        user = users_collection.find_one({"email": email})
+        # ✅ Use mongo.db.users (consistent)
+        user = mongo.db.users.find_one({"email": email})
 
         if not user or not check_password_hash(user["password"], password):
             flash("Invalid email or password", "error")
@@ -236,8 +237,11 @@ def login():
         session["email"] = email
         flash("Logged in", "success")
 
-        # ✅ NORMAL LOGIN ALWAYS GOES TO DASHBOARD
-        return redirect(url_for("dashboard"))
+        # 🔥 ROLE-BASED REDIRECT
+        if user.get("role") == "admin":
+            return redirect(url_for("admin"))   # 👉 Admin dashboard
+        else:
+            return redirect(url_for("dashboard"))  # 👉 Normal user dashboard
 
     return render_template("login.html")
 
