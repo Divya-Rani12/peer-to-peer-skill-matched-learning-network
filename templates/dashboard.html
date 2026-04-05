@@ -82,6 +82,9 @@
       <p><strong>Skills:</strong> 
         {{ user.skills | join(", ") if user.skills else "Not added yet" }}
       </p>
+      
+      <p><strong>Language:</strong>
+         {{ user.language }}</p>
 
       <p><strong>Learning:</strong> 
         {{ user.learn_skills | join(", ") if user.learn_skills else "Not added yet" }}
@@ -90,6 +93,17 @@
       <p><strong>Bio:</strong>
         {{ user.bio if user.bio else "No bio added." }}
       </p>
+
+      <!-- ✅ ADD HERE -->
+      <h3>🌐 Users with Same Language</h3>
+
+      {% if matched_users %}
+        {% for u in matched_users %}
+          <p>{{ u.email }} — {{ u.language }}</p>
+        {% endfor %}
+      {% else %}
+        <p>No users found with same language</p>
+      {% endif %}
     </section>
 
   </main>

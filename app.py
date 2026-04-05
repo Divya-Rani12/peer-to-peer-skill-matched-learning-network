@@ -250,17 +250,29 @@ def dashboard():
     if "email" not in session:
         return redirect(url_for("login"))
 
-    user = users_collection.find_one({"email": session["email"]})
+    # ✅ Get logged-in user
+    user = mongo.db.users.find_one({"email": session["email"]})
 
     if not user:
         session.clear()
         return redirect(url_for("login"))
 
+    # ✅ Progress calculation
     try:
         progress = calculate_progress(session["email"])
     except Exception as e:
         print("❌ Progress error:", e)
         progress = 0
+
+    # ✅ LANGUAGE MATCHING (NEW FEATURE)
+    user_lang = user.get("language")
+
+    matched_users = []
+    if user_lang:
+        matched_users = list(mongo.db.users.find({
+            "language": user_lang,
+            "email": {"$ne": user["email"]}  # exclude self
+        }))
 
     print("✅ Dashboard loaded for:", session["email"])
 
@@ -268,7 +280,8 @@ def dashboard():
         "dashboard.html",
         user=user,
         progress=progress,
-        current_user=session["email"]
+        current_user=session["email"],
+        matched_users=matched_users   # ✅ PASS THIS
     )
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
@@ -283,14 +296,16 @@ def profile():
         experience = request.form.get("experience", "")
         bio = request.form.get("bio", "")
         availability = request.form.get("availability", "")
+        language = request.form.get("language", "")
 
         update_data = {
             "skills": skills,
             "learn_skills": learn_skills,
             "experience": experience,
             "bio": bio,
-            "availability": availability
-        }
+            "availability": availability,
+            "language": language   # ✅ ADD THIS
+}
 
         # Handle profile picture upload
         if "profile_pic" in request.files:

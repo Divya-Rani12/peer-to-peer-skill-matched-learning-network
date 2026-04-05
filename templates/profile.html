@@ -25,6 +25,13 @@
         <textarea name="bio">{{ user.bio if user }}</textarea>
         <label>Availability</label>
         <input type="text" name="availability" value="{{ user.availability if user }}">
+        <label>Preferred Language</label>
+        <select name="language" required>
+          <option value="">Select</option>
+          <option value="English" {% if user and user.language == "English" %}selected{% endif %}>English</option>
+          <option value="Hindi" {% if user and user.language == "Hindi" %}selected{% endif %}>Hindi</option>
+          <option value="Hinglish" {% if user and user.language == "Hinglish" %}selected{% endif %}>Hinglish</option>
+        </select>
         <button type="submit" class="btn">Save Profile</button>
       </form>
 
