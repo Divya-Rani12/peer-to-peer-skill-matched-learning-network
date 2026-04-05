@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Dashboard</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="dash-hero">
+  <div class="dash-inner">
+    <h1>🛠 Admin Dashboard</h1>
+    <a class="btn ghost" href="{{ url_for('dashboard') }}">Back</a>
+  </div>
+</header>
+
+<main class="main container">
+
+<!-- 👥 USERS SECTION -->
+<h2>👥 Users</h2>
+
+{% if users and users|length > 0 %}
+<ul class="peers-list">
+  {% for u in users %}
+  <li class="peer-card">
+    <p><strong>Email:</strong> {{ u.email }}</p>
+    <p><strong>Name:</strong> {{ u.first_name }} {{ u.last_name }}</p>
+
+    <!-- DELETE USER (optional) -->
+    <form method="POST" action="/delete-user/{{ u._id }}">
+      <button class="btn ghost">❌ Delete User</button>
+    </form>
+    
+  </li>
+  <li class="peer-card">
+  <p><strong>Email:</strong> {{ u.email }}</p>
+  <p><strong>Name:</strong> {{ u.first_name }} {{ u.last_name }}</p>
+
+  <form method="POST" action="/delete-user/{{ u._id }}">
+    <button class="btn ghost">❌ Delete User</button>
+  </form>
+</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No users found.</p>
+{% endif %}
+
+<hr>
+
+<!-- 📊 SESSIONS SECTION -->
+<h2>📊 Sessions</h2>
+
+{% if sessions and sessions|length > 0 %}
+<ul class="peers-list">
+  {% for s in sessions %}
+  <li class="peer-card">
+
+    <p><strong>From:</strong> {{ s.from }}</p>
+    <p><strong>To:</strong> {{ s.to }}</p>
+    <p><strong>Status:</strong> {{ s.status }}</p>
+
+    <p>
+      <strong>Scheduled:</strong>
+      {{ s.scheduled_time.replace('T',' ') if s.scheduled_time else "Not Set" }}
+    </p>
+
+    <!-- DELETE SESSION -->
+    <form method="POST" action="/delete-session/{{ s._id }}">
+      <button class="btn ghost">🗑 Delete Session</button>
+    </form>
+
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No sessions found.</p>
+{% endif %}
+
+<hr>
+
+<!-- ⭐ FEEDBACK SECTION -->
+<h2>⭐ Feedback</h2>
+
+{% if feedback and feedback|length > 0 %}
+<ul class="peers-list">
+  {% for f in feedback %}
+  <li class="peer-card">
+
+    <p><strong>From:</strong> {{ f.from }}</p>
+    <p><strong>To:</strong> {{ f.to }}</p>
+    <p><strong>Rating:</strong> {{ f.rating }} ⭐</p>
+    <p><strong>Comment:</strong> {{ f.comment }}</p>
+
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No feedback available.</p>
+{% endif %}
+
+</main>
+
+</body>
+</html>

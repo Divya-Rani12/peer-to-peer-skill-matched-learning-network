@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <title>Session Notes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="dash-hero">
+  <div class="dash-inner">
+    <h1>Session Notes</h1>
+    <a class="btn ghost" href="{{ url_for('requests_page') }}">Back</a>
+  </div>
+</header>
+
+<main class="main container">
+  <form method="POST" class="peer-card">
+    <textarea name="content" rows="10"
+      placeholder="Write session notes here..."
+      style="width:100%; padding:14px; border-radius:8px;">{{ content }}</textarea>
+
+    <button class="btn" style="margin-top:12px;">Save Notes</button>
+  </form>
+</main>
+
+</body>
+</html>

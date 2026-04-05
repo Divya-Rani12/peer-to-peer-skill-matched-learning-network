@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Scheduled Sessions</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="dash-hero">
+  <div class="dash-inner">
+    <h1>📅 Scheduled Sessions</h1>
+    <a class="btn ghost" href="{{ url_for('dashboard') }}">Back</a>
+  </div>
+</header>
+
+<main class="main container">
+
+{% if sessions and sessions|length > 0 %}
+
+<ul class="peers-list">
+
+{% for s in sessions %}
+<li class="peer-card">
+
+  <!-- 👤 PEER NAME -->
+  <p>
+    <strong>With:</strong>
+    {% if s.from == user %}
+      {{ s.to }}
+    {% else %}
+      {{ s.from }}
+    {% endif %}
+  </p>
+
+  <!-- 📅 TIME -->
+  <p>
+    <strong>Scheduled Time:</strong>
+    {{ s.scheduled_time.replace('T',' ') if s.scheduled_time else "Not Set" }}
+  </p>
+
+  <!-- 📊 STATUS -->
+  <p>
+    <strong>Status:</strong> {{ s.status }}
+  </p>
+
+  <!-- 🎥 JOIN BUTTON -->
+  {% if s.status == "accepted" and s.room_id %}
+  <div class="session-tools">
+    <a href="{{ url_for('meeting', room_id=s.room_id) }}" class="btn meeting-btn">
+      📹 Join Meeting
+    </a>
+  </div>
+  {% else %}
+    {% if s.status == "pending" %}
+  <p style="color:orange;">⏳ Pending</p>
+{% elif s.status == "rejected" %}
+  <p style="color:red;">❌ Rejected</p>
+{% endif %}
+  {% endif %}
+
+</li>
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No scheduled sessions available.</p>
+
+{% endif %}
+
+</main>
+
+</body>
+</html>

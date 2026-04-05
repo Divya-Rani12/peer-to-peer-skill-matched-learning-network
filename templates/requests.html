@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Session Requests</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .requests-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .request-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-left: 5px solid #ccc;
+      transition: transform 0.2s ease;
+    }
+
+    .request-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .request-card.pending  { border-left-color: #f59e0b; }
+    .request-card.accepted { border-left-color: #10b981; }
+    .request-card.rejected { border-left-color: #ef4444; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .peer-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .badge {
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge.pending  { background: #fef3c7; color: #92400e; }
+    .badge.accepted { background: #d1fae5; color: #065f46; }
+    .badge.rejected { background: #fee2e2; color: #991b1b; }
+
+    .card-meta {
+      font-size: 0.88rem;
+      color: #64748b;
+      margin-bottom: 1rem;
+    }
+
+    .card-meta span {
+      margin-right: 1.2rem;
+    }
+
+    .role-tag {
+      font-size: 0.8rem;
+      color: #6366f1;
+      font-weight: 500;
+      background: #eef2ff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 8px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .btn-accept {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-accept:hover { background: #059669; }
+
+    .btn-reject {
+      background: transparent;
+      color: #ef4444;
+      border: 2px solid #ef4444;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reject:hover { background: #fee2e2; }
+
+    .btn-meeting {
+      background: #6366f1;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-meeting:hover { background: #4f46e5; }
+
+    .btn-notes {
+      background: #f59e0b;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-notes:hover { background: #d97706; }
+
+    .feedback-section {
+      margin-top: 1.2rem;
+      padding-top: 1.2rem;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .feedback-section summary {
+      cursor: pointer;
+      font-size: 0.88rem;
+      color: #6366f1;
+      font-weight: 500;
+    }
+
+    .feedback-form {
+      display: grid;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+    }
+
+    .feedback-form select,
+    .feedback-form textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.88rem;
+      color: #1e293b;
+      resize: vertical;
+    }
+
+    .btn-feedback {
+      background: #1e293b;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      width: fit-content;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #94a3b8;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+<header class="dash-hero">
+  <div class="dash-inner">
+    <h1>Session Requests</h1>
+    <a class="btn ghost" href="{{ url_for('dashboard') }}">← Back</a>
+  </div>
+</header>
+
+<main class="main container">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:1rem;
+          background: {{ '#d1fae5' if category == 'success' else '#fee2e2' }};
+          color: {{ '#065f46' if category == 'success' else '#991b1b' }};">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if requests and requests|length > 0 %}
+  <div class="requests-grid">
+
+    {% for r in requests %}
+
+    {# Determine peer email and role #}
+    {% if r.from == session['email'] %}
+      {% set peer = r.to %}
+      {% set role = "Sent" %}
+      {% set is_receiver = false %}
+    {% else %}
+      {% set peer = r.from %}
+      {% set role = "Received" %}
+      {% set is_receiver = true %}
+    {% endif %}
+
+    <div class="request-card {{ r.status }}">
+
+      <div class="card-header">
+        <span class="peer-name">👤 {{ peer }}</span>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <span class="role-tag">{{ role }}</span>
+          <span class="badge {{ r.status }}">{{ r.status }}</span>
+        </div>
+      </div>
+
+      <div class="card-meta">
+        {% if r.scheduled_time %}
+          <span>🕐 {{ r.scheduled_time.replace('T', ' ') }}</span>
+        {% endif %}
+        <span>📅 {{ r.created_at.strftime('%d %b %Y') if r.created_at else '' }}</span>
+      </div>
+
+      {# --- PENDING: only receiver can accept/reject --- #}
+      {% if r.status == "pending" and is_receiver %}
+      <div class="card-actions">
+        <form method="POST" action="{{ url_for('accept_request', request_id=r._id) }}">
+          <button class="btn-accept">✅ Accept</button>
+        </form>
+        <form method="POST" action="{{ url_for('reject_request', request_id=r._id) }}">
+          <button class="btn-reject">✗ Reject</button>
+        </form>
+      </div>
+      {% endif %}
+
+      {% if r.status == "pending" and not is_receiver %}
+      <p style="font-size:0.88rem; color:#92400e;">⏳ Waiting for response...</p>
+      {% endif %}
+
+      {# --- ACCEPTED: show Join Meeting + Notes --- #}
+      {% if r.status == "accepted" %}
+      <div class="card-actions">
+        {% if r.room_id %}
+          <a href="{{ url_for('meeting', room_id=r.room_id) }}" class="btn-meeting">
+            📹 Join Meeting
+          </a>
+        {% else %}
+          <span style="color:#94a3b8; font-size:0.85rem;">⚠️ Room not ready yet</span>
+        {% endif %}
+
+        <a href="{{ url_for('notes') }}" class="btn-notes">
+          📝 Notes
+        </a>
+      </div>
+
+      {# Feedback form (collapsible) #}
+      <div class="feedback-section">
+        <details>
+          <summary>💬 Leave Feedback for this session</summary>
+          <form method="POST" action="{{ url_for('submit_feedback') }}" class="feedback-form">
+            <input type="hidden" name="session_id" value="{{ r._id }}">
+            <input type="hidden" name="to_email" value="{{ peer }}">
+            <select name="rating" required>
+              <option value="" disabled selected>⭐ Rate this session (1–5)</option>
+              <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+              <option value="4">⭐⭐⭐⭐ Good</option>
+              <option value="3">⭐⭐⭐ Average</option>
+              <option value="2">⭐⭐ Poor</option>
+              <option value="1">⭐ Very Poor</option>
+            </select>
+            <textarea name="comment" rows="3" placeholder="Share your experience..."></textarea>
+            <button type="submit" class="btn-feedback">Submit Feedback</button>
+          </form>
+        </details>
+      </div>
+      {% endif %}
+
+      {# --- REJECTED --- #}
+      {% if r.status == "rejected" %}
+      <p style="font-size:0.88rem; color:#ef4444;">❌ This request was declined.</p>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>No session requests yet</h3>
+    <p>Head over to <a href="{{ url_for('peers') }}">Peers</a> to request a session!</p>
+  </div>
+  {% endif %}
+
+</main>
+</body>
+</html>

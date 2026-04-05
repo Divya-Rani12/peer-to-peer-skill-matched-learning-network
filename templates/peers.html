@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Find Peers</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="dash-hero">
+  <div class="dash-inner">
+    <h1>Peers Recommended for You</h1>
+    <p class="subtitle">
+      AI-based peer matching using skills & learning goals
+    </p>
+    <div class="cta">
+      <a class="btn ghost" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    </div>
+  </div>
+</header>
+
+<main class="main container">
+<section>
+
+{% if matches %}
+<ul class="peers-list">
+
+{% for m in matches %}
+<li class="peer-card">
+
+  <h3>{{ m.name or m.email }}</h3>
+
+  <p><strong>Skills:</strong>
+     {{ m.skills | join(', ') if m.skills else '—' }}
+  </p>
+
+  <p>{{ m.bio }}</p>
+
+  {% set status = session_map.get(m.email) %}
+
+  {% if status == "pending" %}
+    <p style="color:orange;">⏳ Request Pending</p>
+
+  {% elif status == "accepted" %}
+    <p style="color:green;">✅ Connected</p>
+
+  {% elif status == "rejected" %}
+    <p style="color:red;">❌ Request Rejected</p>
+
+  {% else %}
+    <form method="POST" action="{{ url_for('request_session') }}">
+      <input type="hidden" name="peer_email" value="{{ m.email }}">
+      <input type="datetime-local" name="scheduled_time" required>
+      <button class="btn">Request Session</button>
+    </form>
+  {% endif %}
+
+</li>
+{% endfor %}
+
+</ul>
+{% else %}
+<p>No peers found. Complete profiles to improve matching.</p>
+{% endif %}
+
+</section>
+</main>
+
+<footer class="site-footer">
+  <p>Customer Support:
+    <a href="mailto:support@p2plearning.ai">support@p2plearning.ai</a>
+  </p>
+</footer>
+
+</body>
+</html>

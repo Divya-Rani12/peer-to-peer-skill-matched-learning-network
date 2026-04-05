@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard - Peer Learning</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- ✅ FIX: Progress Text Color -->
+  <style>
+    .progress-box,
+    .progress-box h3,
+    .progress-box p {
+      color: #000 !important;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <header class="dash-hero">
+    <div class="dash-inner">
+
+      <h1>Welcome, {{ user.first_name }}!</h1>
+
+      <!-- ✅ PROGRESS BOX -->
+      <div class="progress-box" style="margin-top:20px; padding:20px; background:#e3f2fd; border-radius:12px;">
+        
+        <h3>Your Progress</h3>
+
+        <p style="font-size:18px;">
+          ⭐ Average Rating: <strong>{{ progress }}/5</strong>
+        </p>
+
+        <!-- Progress Bar -->
+        <div style="background:#ddd; width:250px; border-radius:10px;">
+          <div style="
+            background:green;
+            width:{{ progress * 20 }}%;
+            color:white;
+            padding:5px;
+            border-radius:10px;
+            text-align:center;">
+            {{ progress }}/5
+          </div>
+        </div>
+
+      </div>
+
+      <p class="subtitle">This is your dashboard.</p>
+
+      <div class="cta">
+        <a class="btn" href="{{ url_for('profile') }}">Create / Edit Profile</a>
+        <a class="btn ghost" href="{{ url_for('peers') }}">Find Peers</a>
+        <a class="btn ghost" href="{{ url_for('logout') }}">Logout</a>
+        <a class="btn" href="{{ url_for('requests_page') }}">Session Requests</a>
+        <a href="{{ url_for('schedule') }}" class="btn">📅 Schedule</a>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="main container">
+
+    <section>
+      <h2>Your Profile</h2>
+
+      {% if user.profile_pic %}
+        <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}"
+             alt="Profile Picture"
+             class="profile-pic"
+             style="width:130px; height:130px; border-radius:50%; object-fit:cover; margin-bottom:15px;">
+      {% endif %}
+
+      <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Phone:</strong> {{ user.phone }}</p>
+
+      <p><strong>Skills:</strong> 
+        {{ user.skills | join(", ") if user.skills else "Not added yet" }}
+      </p>
+
+      <p><strong>Learning:</strong> 
+        {{ user.learn_skills | join(", ") if user.learn_skills else "Not added yet" }}
+      </p>
+
+      <p><strong>Bio:</strong>
+        {{ user.bio if user.bio else "No bio added." }}
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Customer Support: 
+      <a href="mailto:support@p2plearning.ai">support@p2plearning.ai</a>
+    </p>
+  </footer>
+
+</body>
+</html>

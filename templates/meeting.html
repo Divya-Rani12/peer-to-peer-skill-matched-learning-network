@@ -1,0 +1,296 @@
+<!doctype html>
+<html>
+<head>
+  <title>Live Study Session</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+  <style>
+    body { font-family: Arial; padding: 20px; }
+
+    #controls button {
+      margin: 5px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    #videoContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 10px;
+      min-height: 300px;
+    }
+
+    video {
+      width: 220px;
+      height: 160px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    #notes {
+      width: 100%;
+      height: 200px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📚 Live Study Session</h2>
+<p>Session ID: {{ session_id }}</p>
+<h3>Room: {{ room_id }}</h3>
+
+<p id="timer">Time: 0 sec</p>
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button id="startBtn">Start Camera</button>
+  <button id="callBtn">Call</button>
+  <button id="acceptBtn" style="display:none;">Accept</button>
+  <button id="rejectBtn" style="display:none;">Reject</button>
+  <button id="muteBtn">Mute</button>
+  <button id="cameraBtn">Camera</button>
+  <button id="recStartBtn">Start Rec</button>
+  <button id="recStopBtn">Stop Rec</button>
+  <button id="endBtn">End Call</button>
+</div>
+
+<!-- VIDEO -->
+<div id="videoContainer">
+  <video id="localVideo" autoplay muted></video>
+</div>
+
+<!-- NOTES -->
+<h3>📝 Shared Notes</h3>
+<textarea id="notes"></textarea>
+
+<hr>
+
+<form method="POST" action="/submit-feedback">
+  <input type="hidden" name="session_id" value="{{ session_id }}">
+  <input type="hidden" name="to_email" value="{{ to_email }}">
+
+  <select name="rating" required>
+    <option value="">Rating</option>
+    <option value="1">1 ⭐</option>
+    <option value="2">2 ⭐</option>
+    <option value="3">3 ⭐</option>
+    <option value="4">4 ⭐</option>
+    <option value="5">5 ⭐</option>
+  </select>
+
+  <br><br>
+  <textarea name="comment" placeholder="Write feedback..." required></textarea>
+  <br><br>
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const socket = io(window.location.origin);
+  const room = "{{ room_id }}";
+
+  socket.on("incoming-call", () => {
+    console.log("Incoming call received");
+  });
+
+  socket.on("call-accepted", () => {
+    console.log("Call accepted - starting connection");
+  });
+
+  let localStream = null;
+  let peerConnection = null;
+  let recorder = null;
+  let chunks = [];
+  let seconds = 0;
+  let timerInterval = null;
+
+  const startBtn = document.getElementById("startBtn");
+  const callBtn = document.getElementById("callBtn");
+  const acceptBtn = document.getElementById("acceptBtn");
+  const rejectBtn = document.getElementById("rejectBtn");
+  const endBtn = document.getElementById("endBtn");
+
+  const muteBtn = document.getElementById("muteBtn");
+  const cameraBtn = document.getElementById("cameraBtn");
+  const recStartBtn = document.getElementById("recStartBtn");
+  const recStopBtn = document.getElementById("recStopBtn");
+
+  const videoContainer = document.getElementById("videoContainer");
+  const notes = document.getElementById("notes");
+
+  const servers = {
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+  };
+
+  // 🎥 START CAMERA
+  startBtn.onclick = async () => {
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      document.getElementById("localVideo").srcObject = localStream;
+
+      socket.emit("join", { room });
+
+      console.log("Joined room");
+    } catch (e) {
+      alert("Camera permission required");
+    }
+  };
+
+  // 📞 CALL
+  callBtn.onclick = () => {
+    if (!localStream) return alert("Start camera first");
+    socket.emit("call-user", { room });
+  };
+
+  // 📲 INCOMING
+  socket.on("incoming-call", () => {
+    acceptBtn.style.display = "inline";
+    rejectBtn.style.display = "inline";
+  });
+
+  // ✅ ACCEPT
+  acceptBtn.onclick = () => {
+    socket.emit("accept-call", { room });
+    acceptBtn.style.display = "none";
+    rejectBtn.style.display = "none";
+  };
+
+  // ❌ REJECT
+  rejectBtn.onclick = () => {
+    acceptBtn.style.display = "none";
+    rejectBtn.style.display = "none";
+  };
+
+  // 🚀 START CONNECTION
+  socket.on("call-accepted", async () => {
+    startTimer();
+    createPeerConnection();
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    socket.emit("offer", { room, offer });
+  });
+
+  function createPeerConnection() {
+    peerConnection = new RTCPeerConnection(servers);
+
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
+
+    peerConnection.ontrack = event => {
+      const video = document.createElement("video");
+      video.srcObject = event.streams[0];
+      video.autoplay = true;
+      videoContainer.appendChild(video);
+    };
+
+    peerConnection.onicecandidate = e => {
+      if (e.candidate) {
+        socket.emit("ice-candidate", { room, candidate: e.candidate });
+      }
+    };
+  }
+
+  socket.on("offer", async data => {
+    createPeerConnection();
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    socket.emit("answer", { room, answer });
+  });
+
+  socket.on("answer", async data => {
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+  });
+
+  socket.on("ice-candidate", async data => {
+    if (peerConnection) {
+      await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+    }
+  });
+
+  // ⏱ TIMER
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      seconds++;
+      document.getElementById("timer").innerText = "Time: " + seconds + " sec";
+    }, 1000);
+  }
+
+  // 🎤 MUTE
+  muteBtn.onclick = () => {
+    if (!localStream) return;
+    const enabled = localStream.getAudioTracks()[0].enabled;
+    localStream.getAudioTracks()[0].enabled = !enabled;
+  };
+
+  // 📷 CAMERA
+  cameraBtn.onclick = () => {
+    if (!localStream) return;
+    const enabled = localStream.getVideoTracks()[0].enabled;
+    localStream.getVideoTracks()[0].enabled = !enabled;
+  };
+
+  // 📹 RECORD
+  recStartBtn.onclick = () => {
+    if (!localStream) return;
+    recorder = new MediaRecorder(localStream);
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.start();
+  };
+
+  recStopBtn.onclick = () => {
+    if (!recorder) return;
+    recorder.stop();
+
+    recorder.onstop = () => {
+      const blob = new Blob(chunks);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "session.webm";
+      a.click();
+      chunks = [];
+    };
+  };
+
+  // 📝 NOTES
+  notes.addEventListener("input", () => {
+    socket.emit("notes-update", { room, content: notes.value });
+  });
+
+  socket.on("notes-update", data => {
+    notes.value = data.content;
+  });
+
+  // ❌ END CALL
+  endBtn.onclick = () => {
+    if (peerConnection) peerConnection.close();
+    if (localStream) localStream.getTracks().forEach(t => t.stop());
+    if (timerInterval) clearInterval(timerInterval);
+
+    videoContainer.innerHTML = '<video id="localVideo" autoplay muted></video>';
+    seconds = 0;
+  };
+
+});
+</script>
+
+</body>
+</html>

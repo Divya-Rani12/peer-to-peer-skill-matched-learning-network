@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Create Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="form-page">
+    <div class="form-box">
+      <h2>Create / Edit Profile</h2>
+
+      <form action="{{ url_for('profile') }}" method="POST" enctype="multipart/form-data">
+        <label>Upload Profile Picture:</label>
+        <input type="file" name="profile_pic" accept="image/*">
+        <label>Skills (comma separated)</label>
+        <input type="text" name="skills" value="{{ user.skills | join(', ') if user }}">
+        <label>Skills you want to learn (comma separated)</label>
+        <input type="text" name="learn_skills" value="{{ user.learn_skills | join(', ') if user }}">
+        <label>Experience</label>
+        <input type="text" name="experience" value="{{ user.experience if user }}">
+        <label>Bio</label>
+        <textarea name="bio">{{ user.bio if user }}</textarea>
+        <label>Availability</label>
+        <input type="text" name="availability" value="{{ user.availability if user }}">
+        <button type="submit" class="btn">Save Profile</button>
+      </form>
+
+      <p class="muted"><a href="{{ url_for('dashboard') }}">&larr; Back to Dashboard</a></p>
+    </div>
+  </div>
+</body>
+</html>

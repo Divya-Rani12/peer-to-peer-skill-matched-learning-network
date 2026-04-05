@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Peer-to-Peer Skill Matched Learning Network</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<header class="hero">
+
+<div class="hero-card">
+
+<h1>Peer-to-Peer Skill-Matched Learning Network</h1>
+
+<p class="subtitle">
+AI-powered peer matching platform that connects learners and mentors
+to collaborate, share knowledge, and grow together.
+</p>
+
+<div class="cta">
+
+{% if 'email' in session %}
+
+<a class="btn primary" href="{{ url_for('dashboard') }}">Dashboard</a>
+
+<a class="btn ghost" href="{{ url_for('logout') }}">Logout</a>
+
+{% else %}
+
+<a class="btn primary" href="{{ url_for('signup') }}">Get Started</a>
+
+<!-- ✅ ADMIN BUTTON ADDED -->
+<a class="btn ghost" href="{{ url_for('login') }}">🛠 Admin Panel</a>
+
+{% endif %}
+
+</div>
+
+<p class="small">
+Already registered?
+<a href="{{ url_for('login') }}">Login here</a>
+</p>
+
+</div>
+
+</header>
+
+<section id="about">
+
+<div class="about-container">
+
+<h2>About the Platform</h2>
+
+<p>
+In today’s fast-changing world, continuous skill development is essential.
+However, traditional learning often requires expensive courses or trainers.
+Our AI-powered peer learning platform solves this problem by connecting
+people who want to learn with those who can teach.
+
+Using intelligent skill matching algorithms, the system identifies the
+most compatible learning partners based on skills, interests, and goals.
+Users can collaborate through real-time sessions, shared notes, and
+progress tracking tools.
+
+This approach creates a collaborative learning environment where knowledge
+flows naturally between peers, making learning more flexible, affordable,
+and human-centered.
+</p>
+
+</div>
+
+</section>
+
+<footer class="site-footer">
+
+<p>
+Customer Support:
+<a href="mailto:support@p2plearning.ai">support@p2plearning.ai</a>
+</p>
+
+<p>
+© 2026 Peer-to-Peer Skill Matched Learning Network
+</p>
+
+</footer>
+
+<!-- Flash Messages -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-wrap">
+
+{% for category, msg in messages %}
+
+<div class="flash {{ category }}">
+{{ msg }}
+</div>
+
+{% endfor %}
+
+</div>
+{% endif %}
+{% endwith %}
+
+</body>
+</html>
