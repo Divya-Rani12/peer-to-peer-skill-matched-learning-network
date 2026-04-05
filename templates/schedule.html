@@ -27,7 +27,7 @@
 {% for s in sessions %}
 <li class="peer-card">
 
-  <!-- 👤 PEER NAME -->
+  <!-- 👤 PEER -->
   <p>
     <strong>With:</strong>
     {% if s.from == user %}
@@ -37,7 +37,7 @@
     {% endif %}
   </p>
 
-  <!-- 📅 TIME -->
+  <!-- 📅 TIME DISPLAY -->
   <p>
     <strong>Scheduled Time:</strong>
     {{ s.scheduled_time.replace('T',' ') if s.scheduled_time else "Not Set" }}
@@ -48,19 +48,33 @@
     <strong>Status:</strong> {{ s.status }}
   </p>
 
+  <!-- ⏰ SET TIME FORM -->
+  {% if s.status == "accepted" %}
+  <form method="POST" action="/set-time" style="margin-top:10px;">
+    <input type="hidden" name="room_id" value="{{ s.room_id }}">
+
+    <label><strong>Set Time:</strong></label><br>
+    <input type="datetime-local" name="scheduled_time" required>
+
+    <button type="submit" class="btn" style="margin-top:5px;">
+      Save Time
+    </button>
+  </form>
+  {% endif %}
+
   <!-- 🎥 JOIN BUTTON -->
   {% if s.status == "accepted" and s.room_id %}
-  <div class="session-tools">
+  <div class="session-tools" style="margin-top:10px;">
     <a href="{{ url_for('meeting', room_id=s.room_id) }}" class="btn meeting-btn">
       📹 Join Meeting
     </a>
   </div>
   {% else %}
     {% if s.status == "pending" %}
-  <p style="color:orange;">⏳ Pending</p>
-{% elif s.status == "rejected" %}
-  <p style="color:red;">❌ Rejected</p>
-{% endif %}
+      <p style="color:orange;">⏳ Pending</p>
+    {% elif s.status == "rejected" %}
+      <p style="color:red;">❌ Rejected</p>
+    {% endif %}
   {% endif %}
 
 </li>

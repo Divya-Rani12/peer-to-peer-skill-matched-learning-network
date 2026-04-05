@@ -535,6 +535,18 @@ def schedule():
 
     return render_template("schedule.html", sessions=sessions, user=user)
 
+@app.route("/set-time", methods=["POST"])
+def set_time():
+    room_id = request.form.get("room_id")
+    scheduled_time = request.form.get("scheduled_time")
+
+    mongo.db.sessions.update_one(
+        {"room_id": room_id},
+        {"$set": {"scheduled_time": scheduled_time}}
+    )
+
+    return redirect("/schedule")
+
 @app.route("/admin")
 def admin():
     if "email" not in session:
@@ -595,6 +607,7 @@ def ask():
     reply = response.choices[0].message.content
 
     return render_template("chat.html", reply=reply) 
+
 
 # JOIN ROOM
 @socketio.on("join")
