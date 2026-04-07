@@ -215,7 +215,7 @@ def signup():
             "learn_skills": [],
             "experience": "",
             "bio": "",
-            "availability": ""
+            "availability": "",
             "language":""
         })
         flash("Account created. Log in.", "success")
