@@ -92,7 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
     configOverwrite: {
       startWithAudioMuted: false,
       startWithVideoMuted: false,
-      disableDeepLinking: true
+      disableDeepLinking: true,
+      prejoinPageEnabled: false,        // skip the pre-join screen
+      enableLobbyChat: false,           // disable lobby
+      lobbyModeEnabled: false 
     },
     interfaceConfigOverwrite: {
       SHOW_JITSI_WATERMARK: false,
@@ -100,6 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         'microphone', 'camera', 'fullscreen',
         'fodeviceselection', 'hangup', 'chat', 'tileview'
       ]
+      HIDE_INVITE_MORE_HEADER: true
     }
   });
 
