@@ -216,6 +216,7 @@ def signup():
             "experience": "",
             "bio": "",
             "availability": ""
+            "language":""
         })
         flash("Account created. Log in.", "success")
         return redirect(url_for("login"))
@@ -556,6 +557,8 @@ def schedule():
 
 @app.route("/set-time", methods=["POST"])
 def set_time():
+    if "email" not in session:
+        return redirect(url_for("login"))
     room_id = request.form.get("room_id")
     scheduled_time = request.form.get("scheduled_time")
 
@@ -669,39 +672,39 @@ def on_join(data):
     emit("user-joined", {"id": request.sid}, room=room, include_self=False)
 
 
-# 📞 CALL USER
-@socketio.on("call-user")
-def call_user(data):
-    room = data["room"]
-    emit("incoming-call", {}, room=room, include_self=False)
+# # 📞 CALL USER
+# @socketio.on("call-user")
+# def call_user(data):
+#     room = data["room"]
+#     emit("incoming-call", {}, room=room, include_self=False)
 
 
-# ✅ ACCEPT CALL
-@socketio.on("accept-call")
-def accept_call(data):
-    room = data["room"]
-    emit("call-accepted", {}, room=room, include_self=False)
+# # ✅ ACCEPT CALL
+# @socketio.on("accept-call")
+# def accept_call(data):
+#     room = data["room"]
+#     emit("call-accepted", {}, room=room, include_self=False)
 
 
-# 🔁 OFFER
-@socketio.on("offer")
-def on_offer(data):
-    emit("offer", data, room=data["room"], include_self=False)
+# # 🔁 OFFER
+# @socketio.on("offer")
+# def on_offer(data):
+#     emit("offer", data, room=data["room"], include_self=False)
 
 
-# 🔁 ANSWER
-@socketio.on("answer")
-def on_answer(data):
-    emit("answer", data, room=data["room"], include_self=False)
+# # 🔁 ANSWER
+# @socketio.on("answer")
+# def on_answer(data):
+#     emit("answer", data, room=data["room"], include_self=False)
 
 
-# 🔁 ICE
-@socketio.on("ice-candidate")
-def on_ice_candidate(data):
-    emit("ice-candidate", data, room=data["room"], include_self=False)
+# # 🔁 ICE
+# @socketio.on("ice-candidate")
+# def on_ice_candidate(data):
+#     emit("ice-candidate", data, room=data["room"], include_self=False)
 
 
-# 📝 NOTES
+# # 📝 NOTES
 @socketio.on("notes-update")
 def on_notes_update(data):
     emit("notes-update", data, room=data["room"], include_self=False)
