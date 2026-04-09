@@ -4,91 +4,160 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Scheduled Sessions</title>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
+  <style>
+    .schedule-grid { display: grid; gap: 1.5rem; margin-top: 2rem; }
 
+    .schedule-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-left: 5px solid #6366f1;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .peer-name { font-size: 1.1rem; font-weight: 600; color: #1e293b; }
+
+    .badge-time {
+      background: #eef2ff;
+      color: #4f46e5;
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .set-time-form {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .set-time-form input[type="datetime-local"] {
+      padding: 0.45rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.88rem;
+    }
+
+    .btn-save {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 0.45rem 1.1rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-save:hover { background: #4f46e5; }
+
+    .btn-join {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+    .btn-join:hover { background: #059669; }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #94a3b8;
+    }
+    .empty-state h3 { font-size: 1.3rem; color: #64748b; margin-bottom: 0.5rem; }
+  </style>
+</head>
 <body>
 
 <header class="dash-hero">
   <div class="dash-inner">
     <h1>📅 Scheduled Sessions</h1>
-    <a class="btn ghost" href="{{ url_for('dashboard') }}">Back</a>
+    <a class="btn ghost" href="{{ url_for('dashboard') }}">← Back</a>
   </div>
 </header>
 
 <main class="main container">
 
-{% if sessions and sessions|length > 0 %}
-
-<ul class="peers-list">
-
-{% for s in sessions %}
-<li class="peer-card">
-
-  <!-- 👤 PEER -->
-  <p>
-    <strong>With:</strong>
-    {% if s.from == user %}
-      {{ s.to }}
-    {% else %}
-      {{ s.from }}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:1rem;
+          background: {{ '#d1fae5' if category == 'success' else '#fee2e2' }};
+          color: {{ '#065f46' if category == 'success' else '#991b1b' }};">
+          {{ message }}
+        </div>
+      {% endfor %}
     {% endif %}
-  </p>
+  {% endwith %}
 
-  <!-- 📅 TIME DISPLAY -->
-  <p>
-    <strong>Scheduled Time:</strong>
-    {{ s.scheduled_time.replace('T',' ') if s.scheduled_time else "Not Set" }}
-  </p>
+  {% if sessions and sessions|length > 0 %}
+  <div class="schedule-grid">
 
-  <!-- 📊 STATUS -->
-  <p>
-    <strong>Status:</strong> {{ s.status }}
-  </p>
+    {% for s in sessions %}
+    <div class="schedule-card">
 
-  <!-- ⏰ SET TIME FORM -->
-  {% if s.status == "accepted" %}
-  <form method="POST" action="/set-time" style="margin-top:10px;">
-    <input type="hidden" name="room_id" value="{{ s.room_id }}">
+      <div class="card-header">
+        <span class="peer-name">
+          👤 With:
+          {% if s.from == user %}{{ s.to }}{% else %}{{ s.from }}{% endif %}
+        </span>
+        {% if s.scheduled_time %}
+          <span class="badge-time">🕐 {{ s.scheduled_time.replace('T', ' ') }}</span>
+        {% else %}
+          <span class="badge-time" style="background:#fef3c7; color:#92400e;">⏰ Time not set</span>
+        {% endif %}
+      </div>
 
-    <label><strong>Set Time:</strong></label><br>
-    <input type="datetime-local" name="scheduled_time" required>
+      <!-- SET / UPDATE TIME -->
+      <form method="POST" action="{{ url_for('set_time') }}" class="set-time-form">
+        <input type="hidden" name="room_id" value="{{ s.room_id }}">
+        <label style="font-size:0.88rem; color:#64748b; font-weight:500;">Set / Update Time:</label>
+        <input type="datetime-local" name="scheduled_time" required>
+        <button type="submit" class="btn-save">💾 Save</button>
+      </form>
 
-    <button type="submit" class="btn" style="margin-top:5px;">
-      Save Time
-    </button>
-  </form>
-  {% endif %}
+      <!-- JOIN MEETING -->
+      {% if s.room_id %}
+      <a href="{{ url_for('meeting', room_id=s.room_id) }}" class="btn-join">
+        📹 Join Meeting
+      </a>
+      {% endif %}
 
-  <!-- 🎥 JOIN BUTTON -->
-  {% if s.status == "accepted" and s.room_id %}
-  <div class="session-tools" style="margin-top:10px;">
-    <a href="{{ url_for('meeting', room_id=s.room_id) }}" class="btn meeting-btn">
-      📹 Join Meeting
-    </a>
+    </div>
+    {% endfor %}
+
   </div>
+
   {% else %}
-    {% if s.status == "pending" %}
-      <p style="color:orange;">⏳ Pending</p>
-    {% elif s.status == "rejected" %}
-      <p style="color:red;">❌ Rejected</p>
-    {% endif %}
+  <div class="empty-state">
+    <h3>No scheduled sessions yet</h3>
+    <p>Accept a session request to schedule a meeting.</p>
+  </div>
   {% endif %}
-
-</li>
-{% endfor %}
-
-</ul>
-
-{% else %}
-
-<p>No scheduled sessions available.</p>
-
-{% endif %}
 
 </main>
-
 </body>
 </html>

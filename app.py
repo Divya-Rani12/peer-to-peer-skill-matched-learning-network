@@ -396,7 +396,10 @@ def requests_page():
 
     # 🔥 ONLY RECEIVED REQUESTS
     requests = list(mongo.db.sessions.find({
-        "to": user
+       "$or": [
+            {"from": user},
+            {"to": user}
+        ]
     }))
 
 

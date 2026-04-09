@@ -279,9 +279,10 @@
           <span style="color:#94a3b8; font-size:0.85rem;">⚠️ Room not ready yet</span>
         {% endif %}
 
-        <a href="{{ url_for('notes') }}" class="btn-notes">
-          📝 Notes
-        </a>
+        <!-- ✅ CORRECT -->
+          <a href="{{ url_for('notes', session_id=r._id) }}" class="btn-notes">
+            📝 Notes
+          </a>
       </div>
 
       {# Feedback form (collapsible) #}
