@@ -12,6 +12,8 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 from bson import ObjectId
+from flask_mail import Mail, Message
+import secrets
 
 
 load_dotenv()
@@ -19,10 +21,12 @@ load_dotenv()
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = os.environ.get("SECRET_KEY")
 
+
+
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 # Mongo config
-import os
+
 
 app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
 mongo = PyMongo(app)
@@ -663,6 +667,10 @@ def ask():
     reply = response.choices[0].message.content
 
     return render_template("chat.html", reply=reply) 
+
+@app.route("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
 
 
 # JOIN ROOM
