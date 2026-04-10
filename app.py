@@ -149,24 +149,30 @@ def compute_matches_for(email, top_n=5):
     learner_skills = current_user.get("learn_skills", []) if current_user else []
 
     for u, s in zip(others, sims):
-
         skill_score = skill_match_score(
             learner_skills,
             u.get("skills", [])
         )
-
         final_score = (0.6 * float(s)) + (0.4 * skill_score)
+
+        # fetch rating for this user
+        feedbacks = list(mongo.db.feedback.find({"to": u.get("email")}))
+        avg_rating = round(sum(f["rating"] for f in feedbacks) / len(feedbacks), 1) if feedbacks else 0
 
         scored.append({
             "email": u.get("email"),
-            "name": f"{u.get('first_name','')} {u.get('last_name','')}".strip(),
+            "name": f"{u.get('first_name', '')} {u.get('last_name', '')}".strip(),
             "score": final_score,
             "skills": u.get("skills", []),
-            "bio": u.get("bio", "")
+            "bio": u.get("bio", ""),
+            "profile_pic": u.get("profile_pic", None),
+            "avg_rating": avg_rating,
+            "rating_count": len(feedbacks)
         })
 
     scored_sorted = sorted(scored, key=lambda x: x["score"], reverse=True)
     return scored_sorted[:top_n]
+
 
 def calculate_progress(email):
     feedbacks = list(mongo.db.feedback.find({"to": email}))
