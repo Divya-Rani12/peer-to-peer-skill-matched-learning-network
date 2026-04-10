@@ -93,19 +93,19 @@ document.addEventListener("DOMContentLoaded", () => {
       startWithAudioMuted: false,
       startWithVideoMuted: false,
       disableDeepLinking: true,
-      prejoinPageEnabled: false,        // skip the pre-join screen
-      enableLobbyChat: false,           // disable lobby
-      lobbyModeEnabled: false 
+      prejoinPageEnabled: false,
+      enableLobbyChat: false,
+      lobbyModeEnabled: false
     },
     interfaceConfigOverwrite: {
       SHOW_JITSI_WATERMARK: false,
       TOOLBAR_BUTTONS: [
         'microphone', 'camera', 'fullscreen',
         'fodeviceselection', 'hangup', 'chat', 'tileview'
-      ]
+      ],
       HIDE_INVITE_MORE_HEADER: true
     }
-  });
+});   // ✅ closes the options object AND the function call
 
   // ── TIMER ────────────────────────────────────────────────
   let seconds = 0;
