@@ -11,7 +11,7 @@
 body {
   color: #333;
   background:
-    linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)),
+    linear-gradient(rgba(255,255,255,0.92), rgba(255, 255, 255, 0.299)),
     url('https://plus.unsplash.com/premium_vector-1698192041909-3a5a4a6ee089?auto=format&q=60&w=1200');
   background-size: cover;
   background-position: center;
@@ -40,7 +40,7 @@ a:hover {
   justify-content: center;
   text-align: center;
   padding: 60px 20px;
-  color: #ffffffea;
+  color: #ffffff57;
 }
 
 .hero-inner {
