@@ -4,7 +4,7 @@
   <title>Live Study Session</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-  <script src="https://meet.jit.si/external_api.js"></script>
+  <script src="https://8x8.vc/external_api.js"></script>
 
   <style>
     body { font-family: Arial; padding: 20px; }
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notes = document.getElementById("notes");
 
   // ── JITSI SETUP ──────────────────────────────────────────
-  const api = new JitsiMeetExternalAPI("meet.jit.si", {
+  const api = new JitsiMeetExternalAPI("8x8.vc", {
     roomName: "skillnet-" + room,
     parentNode: document.getElementById("jitsi-container"),
     width: "100%",
