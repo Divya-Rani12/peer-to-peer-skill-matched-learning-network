@@ -4,93 +4,257 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Admin Dashboard</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      background: #f5f7fb;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'Poppins', sans-serif; background: #f5f7fb; }
 
     header {
-      background: #2c3e50;
+      background: #1e293b;
       color: white;
-      padding: 15px 20px;
+      padding: 15px 25px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
-    .container {
-      padding: 20px;
+    header a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      border: 1px solid #334155;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
     }
+    header a:hover { background: #334155; color: white; }
+
+    .container { padding: 25px; }
+
+    /* FLASH */
+    .flash {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .flash.success { background: #d1fae5; color: #065f46; }
+    .flash.error   { background: #fee2e2; color: #991b1b; }
 
     /* METRICS */
     .metrics {
       display: flex;
       gap: 15px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
-    .card {
+    .metric-card {
       flex: 1;
-      min-width: 180px;
-      padding: 15px;
-      border-radius: 10px;
+      min-width: 150px;
+      padding: 20px;
+      border-radius: 12px;
       color: white;
+      text-align: center;
     }
+    .metric-card h4 { font-size: 0.85rem; opacity: 0.85; margin-bottom: 8px; }
+    .metric-card p  { font-size: 1.8rem; font-weight: 700; }
 
-    .green { background: #28a745; }
-    .yellow { background: #ffc107; color:black;}
-    .red { background: #dc3545; }
-    .blue { background: #007bff; }
+    .green  { background: #10b981; }
+    .blue   { background: #3b82f6; }
+    .yellow { background: #f59e0b; }
+    .purple { background: #8b5cf6; }
+    .red    { background: #ef4444; }
 
-    /* LAYOUT */
+    /* GRID */
     .grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 20px;
+      margin-bottom: 25px;
     }
 
-    canvas {
+    .chart-box {
       background: white;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
     }
 
-    .alerts {
+    .alerts-box {
       background: white;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
     }
 
-    /* TABLE */
-    table {
+    .alerts-box h3 { margin-bottom: 15px; color: #1e293b; }
+
+    .alert-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.88rem;
+      color: #64748b;
+    }
+    .alert-item span { font-weight: 600; color: #ef4444; }
+
+    /* SECTION HEADERS */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 0 15px 0;
+    }
+    .section-header h3 { color: #1e293b; font-size: 1.1rem; }
+
+    /* ADD USER FORM */
+    .add-user-form {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+      display: none;
+    }
+    .add-user-form.open { display: block; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .add-user-form input,
+    .add-user-form select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
       width: 100%;
-      background: white;
-      border-radius: 10px;
-      margin-top: 20px;
-      border-collapse: collapse;
     }
 
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
+    /* TABLES */
+    .table-wrap {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      overflow: hidden;
+      margin-bottom: 25px;
     }
+
+    table { width: 100%; border-collapse: collapse; }
 
     th {
-      background: #007bff;
+      background: #1e293b;
       color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 500;
     }
 
-    h3 {
-      margin-top: 30px;
+    td {
+      padding: 11px 15px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.85rem;
+      color: #374151;
+      vertical-align: middle;
     }
 
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* BUTTONS */
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: #2563eb; }
+
+    .btn-danger {
+      background: transparent;
+      color: #ef4444;
+      border: 1.5px solid #ef4444;
+      padding: 0.35rem 0.9rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-danger:hover { background: #fee2e2; }
+
+    .btn-ghost {
+      background: transparent;
+      color: #64748b;
+      border: 1.5px solid #e2e8f0;
+      padding: 0.35rem 0.9rem;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .btn-ghost:hover { background: #f1f5f9; }
+
+    /* BADGE */
+    .badge {
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge.pending  { background: #fef3c7; color: #92400e; }
+    .badge.accepted { background: #d1fae5; color: #065f46; }
+    .badge.rejected { background: #fee2e2; color: #991b1b; }
+    .badge.admin    { background: #ede9fe; color: #5b21b6; }
+    .badge.user     { background: #e0f2fe; color: #075985; }
+
+    /* SEARCH */
+    .search-input {
+      padding: 0.45rem 0.9rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
+      width: 220px;
+    }
+
+    /* PROFILE PIC */
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #e2e8f0;
+    }
+
+    .avatar-placeholder {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
 
@@ -98,109 +262,245 @@
 
 <header>
   <h2>⚙️ Admin Dashboard</h2>
-  <span>System Overview</span>
+  <a href="{{ url_for('logout') }}">Logout →</a>
 </header>
 
 <div class="container">
 
-  <!-- 🔝 METRICS -->
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- METRICS -->
   <div class="metrics">
-    <div class="card green">
-      <h3>DAU</h3>
+    <div class="metric-card green">
+      <h4>Total Users</h4>
       <p>{{ dau }}</p>
     </div>
-
-    <div class="card blue">
-      <h3>Matches</h3>
+    <div class="metric-card blue">
+      <h4>Total Sessions</h4>
       <p>{{ matches_today }}</p>
     </div>
-
-    <div class="card yellow">
-      <h3>Avg RMS</h3>
+    <div class="metric-card yellow">
+      <h4>Avg RMS</h4>
       <p>{{ avg_rms }}</p>
     </div>
-
-    <div class="card green">
-      <h3>Completion</h3>
+    <div class="metric-card purple">
+      <h4>Completion</h4>
       <p>{{ completion_rate }}%</p>
     </div>
-
-    <div class="card red">
-      <h3>Live Sessions</h3>
+    <div class="metric-card red">
+      <h4>Live Sessions</h4>
       <p>{{ active_sessions }}</p>
     </div>
   </div>
 
-  <!-- 📊 GRAPHS + ALERTS -->
+  <!-- CHARTS + ALERTS -->
   <div class="grid">
-
-    <!-- LEFT SIDE -->
     <div>
-      <canvas id="userChart"></canvas>
-      <br>
-      <canvas id="rmsChart"></canvas>
+      <div class="chart-box" style="margin-bottom:15px;">
+        <canvas id="userChart" height="120"></canvas>
+      </div>
+      <div class="chart-box">
+        <canvas id="rmsChart" height="120"></canvas>
+      </div>
     </div>
 
-    <!-- RIGHT SIDE -->
-    <div class="alerts">
+    <div class="alerts-box">
       <h3>🚨 Alerts</h3>
-      <p>Low Rated Sessions: {{ low_rated }}</p>
-      <p>Reported Users: {{ reported_users }}</p>
-      <p>Suspicious Activity: {{ suspicious }}</p>
+      <div class="alert-item">
+        <span>Low Rated Sessions</span>
+        <span>{{ low_rated }}</span>
+      </div>
+      <div class="alert-item">
+        <span>Reported Users</span>
+        <span>{{ reported_users }}</span>
+      </div>
+      <div class="alert-item">
+        <span>Suspicious Activity</span>
+        <span>{{ suspicious }}</span>
+      </div>
+      <div class="alert-item">
+        <span>Pending Requests</span>
+        <span>{{ sessions | selectattr('status', 'equalto', 'pending') | list | length }}</span>
+      </div>
+      <div class="alert-item">
+        <span>Total Feedback</span>
+        <span>{{ feedbacks | length }}</span>
+      </div>
     </div>
-
   </div>
 
-  <!-- 👥 USERS -->
-  <h3>Users</h3>
-  <table>
-    <tr>
-      <th>Email</th>
-      <th>Action</th>
-    </tr>
-    {% for u in users %}
-    <tr>
-      <td>{{ u.email }}</td>
-      <td><a href="#">Ban</a></td>
-    </tr>
-    {% endfor %}
-  </table>
+  <!-- ── USERS SECTION ── -->
+  <div class="section-header">
+    <h3>👥 Users ({{ users | length }})</h3>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <input type="text" class="search-input" placeholder="🔍 Search users..."
+             onkeyup="filterTable('usersTable', this.value)">
+      <button class="btn-primary" onclick="toggleAddForm()">+ Add User</button>
+    </div>
+  </div>
 
-  <!-- 📚 SESSIONS -->
-  <h3>Sessions</h3>
-  <table>
-    <tr>
-      <th>Room</th>
-      <th>Status</th>
-      <th>Time</th>
-    </tr>
-    {% for s in sessions %}
-    <tr>
-      <td>{{ s.room_id }}</td>
-      <td>{{ s.status }}</td>
-      <td>{{ s.scheduled_time if s.scheduled_time else "Not Set" }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+  <!-- ADD USER FORM -->
+  <div class="add-user-form" id="addUserForm">
+    <h4 style="margin-bottom:15px; color:#1e293b;">Add New User</h4>
+    <form method="POST" action="{{ url_for('admin_add_user') }}">
+      <div class="form-grid">
+        <input type="text" name="first_name" placeholder="First Name" required>
+        <input type="text" name="last_name" placeholder="Last Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="tel" name="phone" placeholder="Phone" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <select name="role">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+        <input type="text" name="skills" placeholder="Skills (comma separated)">
+        <input type="text" name="learn_skills" placeholder="Learning Goals (comma separated)">
+        <select name="language">
+          <option value="English">English</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Hinglish">Hinglish</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">Create User</button>
+      <button type="button" class="btn-ghost" style="margin-left:10px;"
+              onclick="toggleAddForm()">Cancel</button>
+    </form>
+  </div>
 
-  <!-- ⭐ FEEDBACK -->
-  <h3>Feedback</h3>
-  <table>
-    <tr>
-      <th>Rating</th>
-      <th>Comment</th>
-    </tr>
-    {% for f in feedbacks %}
-    <tr>
-      <td>{{ f.rating }} ⭐</td>
-      <td>{{ f.comment }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+  <!-- USERS TABLE -->
+  <div class="table-wrap">
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th>Skills</th>
+          <th>Language</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            {% if u.profile_pic %}
+              <img src="{{ url_for('static', filename='uploads/' + u.profile_pic) }}"
+                   class="avatar" alt="pic">
+            {% else %}
+              <div class="avatar-placeholder">👤</div>
+            {% endif %}
+          </td>
+          <td><strong>{{ u.first_name }} {{ u.last_name }}</strong></td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.phone or '—' }}</td>
+          <td><span class="badge {{ u.role or 'user' }}">{{ u.role or 'user' }}</span></td>
+          <td>{{ u.skills | join(', ') if u.skills else '—' }}</td>
+          <td>{{ u.language or '—' }}</td>
+          <td>
+            <form method="POST"
+                  action="{{ url_for('delete_user', id=u._id) }}"
+                  onsubmit="return confirm('Delete {{ u.email }}?')"
+                  style="display:inline;">
+              <button type="submit" class="btn-danger">🗑 Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── SESSIONS SECTION ── -->
+  <div class="section-header">
+    <h3>📚 Sessions ({{ sessions | length }})</h3>
+    <input type="text" class="search-input" placeholder="🔍 Search sessions..."
+           onkeyup="filterTable('sessionsTable', this.value)">
+  </div>
+
+  <div class="table-wrap">
+    <table id="sessionsTable">
+      <thead>
+        <tr>
+          <th>From</th>
+          <th>To</th>
+          <th>Status</th>
+          <th>Scheduled Time</th>
+          <th>Room ID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in sessions %}
+        <tr>
+          <td>{{ s.from }}</td>
+          <td>{{ s.to }}</td>
+          <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
+          <td>{{ s.scheduled_time.replace('T',' ') if s.scheduled_time else '—' }}</td>
+          <td style="font-size:0.75rem; color:#94a3b8;">
+            {{ s.room_id[:16] + '...' if s.room_id else '—' }}
+          </td>
+          <td>
+            <form method="POST"
+                  action="{{ url_for('delete_session', id=s._id) }}"
+                  onsubmit="return confirm('Delete this session?')"
+                  style="display:inline;">
+              <button type="submit" class="btn-danger">🗑 Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── FEEDBACK SECTION ── -->
+  <div class="section-header">
+    <h3>⭐ Feedback ({{ feedbacks | length }})</h3>
+    <input type="text" class="search-input" placeholder="🔍 Search feedback..."
+           onkeyup="filterTable('feedbackTable', this.value)">
+  </div>
+
+  <div class="table-wrap">
+    <table id="feedbackTable">
+      <thead>
+        <tr>
+          <th>From</th>
+          <th>To</th>
+          <th>Rating</th>
+          <th>Comment</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in feedbacks %}
+        <tr>
+          <td>{{ f.from }}</td>
+          <td>{{ f.to }}</td>
+          <td>
+            {% for i in range(f.rating) %}⭐{% endfor %}
+            ({{ f.rating }}/5)
+          </td>
+          <td>{{ f.comment or '—' }}</td>
+          <td>{{ f.created_at.strftime('%d %b %Y') if f.created_at else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
 </div>
 
-<!-- 📈 CHARTS -->
+<!-- CHARTS -->
 <script>
 new Chart(document.getElementById("userChart"), {
   type: 'line',
@@ -209,9 +509,15 @@ new Chart(document.getElementById("userChart"), {
     datasets: [{
       label: "User Growth",
       data: {{ user_counts|safe }},
-      borderColor: "blue",
-      fill: false
+      borderColor: "#3b82f6",
+      backgroundColor: "rgba(59,130,246,0.1)",
+      fill: true,
+      tension: 0.4
     }]
+  },
+  options: {
+    plugins: { legend: { display: true } },
+    scales: { y: { beginAtZero: true } }
   }
 });
 
@@ -222,11 +528,32 @@ new Chart(document.getElementById("rmsChart"), {
     datasets: [{
       label: "RMS Trend",
       data: {{ rms_scores|safe }},
-      borderColor: "green",
-      fill: false
+      borderColor: "#10b981",
+      backgroundColor: "rgba(16,185,129,0.1)",
+      fill: true,
+      tension: 0.4
     }]
+  },
+  options: {
+    plugins: { legend: { display: true } },
+    scales: { y: { beginAtZero: true } }
   }
 });
+
+// Toggle add user form
+function toggleAddForm() {
+  const form = document.getElementById("addUserForm");
+  form.classList.toggle("open");
+}
+
+// Search/filter table rows
+function filterTable(tableId, query) {
+  const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+  const q = query.toLowerCase();
+  rows.forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
+  });
+}
 </script>
 
 </body>

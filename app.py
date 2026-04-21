@@ -635,6 +635,7 @@ def admin():
         rms_scores=rms_scores
     )
 
+
 @app.route("/test-ai")
 def test_ai():
     response = client.chat.completions.create(
@@ -658,6 +659,42 @@ def delete_user(id):
 def delete_session(id):
     mongo.db.sessions.delete_one({"_id": ObjectId(id)})
     return redirect(url_for("admin"))  
+
+@app.route("/admin/add-user", methods=["POST"])
+def admin_add_user():
+    if "email" not in session:
+        return redirect(url_for("login"))
+
+    admin = mongo.db.users.find_one({"email": session["email"]})
+    if not admin or admin.get("role") != "admin":
+        return redirect(url_for("dashboard"))
+
+    email = request.form.get("email", "").strip().lower()
+
+    if mongo.db.users.find_one({"email": email}):
+        flash("Email already exists.", "error")
+        return redirect(url_for("admin"))
+
+    skills = [s.strip() for s in request.form.get("skills", "").split(",") if s.strip()]
+    learn_skills = [s.strip() for s in request.form.get("learn_skills", "").split(",") if s.strip()]
+
+    mongo.db.users.insert_one({
+        "first_name": request.form.get("first_name", "").strip(),
+        "last_name": request.form.get("last_name", "").strip(),
+        "email": email,
+        "phone": request.form.get("phone", "").strip(),
+        "password": generate_password_hash(request.form.get("password", "")),
+        "role": request.form.get("role", "user"),
+        "skills": skills,
+        "learn_skills": learn_skills,
+        "experience": "",
+        "bio": "",
+        "availability": "",
+        "language": request.form.get("language", "English")
+    })
+
+    flash(f"User {email} created successfully!", "success")
+    return redirect(url_for("admin"))
 
 @app.route("/ask", methods=["POST"])
 def ask():
